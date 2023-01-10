@@ -1,0 +1,81 @@
+default:
+  image: 
+    repository: alexmechain/otel-demo
+
+opentelemetry-collector:
+  config:
+    exporters:
+      coralogix:
+        # The Coralogix traces ingress endpoint
+        traces:
+          endpoint: "otel-traces.coralogix.com:443"
+        metrics:
+          endpoint: "otel-metrics.coralogix.com:443"
+        logs:
+          endpoint: "otel-logs.coralogix.com:443"
+
+        # Your Coralogix private key is sensitive
+        private_key: "bcaf694c-6080-aa9d-bf8b-d398e2b82b39"
+          #valueFrom:
+            #secretKeyRef:
+              #name: mysecrets
+              #key: coralogix
+        # AppNameSubSystem values.
+        # The first non-empty resource attribute is used.
+        # application_name_attributes:
+        #   - "service.namespace"
+        #   - "k8s.namespace.name"
+        # subsystem_name_attributes:
+        #   - "service.name"
+        #   - "k8s.deployment.name"
+        #   - "k8s.statefulset.name"
+        #   - "k8s.daemonset.name"
+        #   - "k8s.cronjob.name"
+        #   - "k8s.job.name"
+        #   - "k8s.container.name"
+        # It is required that logs, metrics and traces emitted by this exporter
+        # are tagged in Coralogix
+        # with the default application and subsystem constants.
+        # Traces, Metrics and Logs emitted by this OpenTelemetry exporter
+        # are tagged in Coralogix with the default application and subsystem constants.
+        application_name: "ecommerce"
+        subsystem_name: "otel-demo"
+
+        # (Optional) Timeout is the timeout for every attempt to send data to the backend.
+        timeout: 30s
+
+    processors:
+      batch/traces:
+        timeout: 1s
+        send_batch_size: 50
+      batch/metrics:
+        timeout: 60s
+      resourcedetection:
+        detectors: [env, docker]
+        timeout: 5s
+        override: true
+
+    service:
+      pipelines:
+        traces:
+          processors: [spanmetrics, batch/traces, batch]
+          exporters: [logging,  otlp,  coralogix]
+        metrics:
+          processors: [resourcedetection, batch/metrics, batch]
+          exporters: [prometheus, logging, coralogix]
+        logs:
+          receivers: [otlp]
+          exporters: [logging, coralogix ]
+
+prometheus:
+  kube-state-metrics:
+    enabled: true
+  prometheus-node-exporter:
+    enabled: true
+  serverFiles:
+    prometheus.yml: 
+      remote_write:
+      - url: https://prometheus-gateway.coralogix.com/prometheus/api/v1/write
+        name: 'k8smetrics'
+        remote_timeout: 120s
+        bearer_token: 'bcaf694c-6080-aa9d-bf8b-d398e2b82b39'  

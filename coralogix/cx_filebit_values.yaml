@@ -1,0 +1,8 @@
+# fluentbit-override.yaml:
+static_metadata:
+  app_name: otel
+dynamic_metadata:
+  sub_system: kubernetes.container_name
+fluent-bit:
+  endpoint: api.coralogix.com
+  logLevel: error

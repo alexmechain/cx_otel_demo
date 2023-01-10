@@ -55,7 +55,8 @@ def send_email(data)
       via:      :test
     )
     span.set_attribute("app.email.recipient", data.email)
-    puts "Order confirmation email sent to: #{data.email}"
+    #puts "Order confirmation email sent to: #{data.email}"
+    puts "Order confirmation email sent to: #{data.email} [span_id: #{span.context.hex_span_id()}, trace_id: #{span.context.hex_trace_id()}]"
   end
   # manually created spans need to be ended
   # in Ruby, the method `in_span` ends it automatically
