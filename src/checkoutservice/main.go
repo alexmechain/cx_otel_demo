@@ -216,7 +216,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		attribute.String("app.user.currency", req.UserCurrency),
 	)
 	//log.Infof("[PlaceOrder] user_id=%q user_currency=%q", req.UserId, req.UserCurrency)
-	log.Infof("[PlaceOrder] user_id=%q user_currency=%q [spanid=%v traceid=%v]", req.UserId, req.UserCurrency, span.SpanContext().SpanID(), span.SpanContext().TraceID())
+	log.Infof("[PlaceOrder] user_id=%q user_currency=%q [span_id:%v trace_id:%v]", req.UserId, req.UserCurrency, span.SpanContext().SpanID(), span.SpanContext().TraceID())
 
 	var err error
 	defer func() {
@@ -250,7 +250,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		return nil, status.Errorf(codes.Internal, "failed to charge card: %+v", err)
 	}
 	//log.Infof("payment went through (transaction_id: %s)", txID)
-	log.Infof("[PlaceOrder] user_id=%q user_currency=%q [spanid=%v traceid=%v]", req.UserId, req.UserCurrency, span.SpanContext().SpanID(), span.SpanContext().TraceID())
+	log.Infof("[PlaceOrder] user_id=%q user_currency=%q [span_id:%v trace_id:%v]", req.UserId, req.UserCurrency, span.SpanContext().SpanID(), span.SpanContext().TraceID())
 
 	span.AddEvent("charged",
 		trace.WithAttributes(attribute.String("app.payment.transaction.id", txID)))
@@ -285,10 +285,10 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		//log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
-		log.Warnf("failed to send order confirmation to %q: %+v [spanid=%v traceid=%v]", req.Email, err, span.SpanContext().SpanID(), span.SpanContext().TraceID())
+		log.Warnf("failed to send order confirmation to %q: %+v [span_id:%v trace_id:%v]", req.Email, err, span.SpanContext().SpanID(), span.SpanContext().TraceID())
 	} else {
 		//log.Infof("order confirmation email sent to %q", req.Email)
-		log.Infof("order confirmation email sent to %q [spanid=%v traceid=%v]", req.Email, span.SpanContext().SpanID(), span.SpanContext().TraceID())
+		log.Infof("order confirmation email sent to %q [span_id:%v trace_id:%v]", req.Email, span.SpanContext().SpanID(), span.SpanContext().TraceID())
 	}
 
 	cs.sendToPostProcessor(ctx, orderResult)
