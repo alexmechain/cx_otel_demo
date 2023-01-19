@@ -18,6 +18,8 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using StackExchange.Redis;
 using Google.Protobuf;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace cartservice.cartstore
 {
@@ -115,7 +117,8 @@ namespace cartservice.cartstore
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
         {
-            Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
+            
+            Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
 
             try
             {
@@ -157,7 +160,7 @@ namespace cartservice.cartstore
 
         public async Task EmptyCartAsync(string userId)
         {
-            Console.WriteLine($"EmptyCartAsync called with userId={userId}");
+            Console.WriteLine($"EmptyCartAsync called with userId={userId} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
 
             try
             {
@@ -175,7 +178,7 @@ namespace cartservice.cartstore
 
         public async Task<Hipstershop.Cart> GetCartAsync(string userId)
         {
-            Console.WriteLine($"GetCartAsync called with userId={userId}");
+            Console.WriteLine($"GetCartAsync called with userId={userId} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
 
             try
             {
