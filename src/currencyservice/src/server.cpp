@@ -124,6 +124,7 @@ class CurrencyService final : public hipstershop::CurrencyService::Service
     auto scope = get_tracer("currencyservice")->WithActiveSpan(span);
 
     span->AddEvent("Processing supported currencies request");
+    
 
     for (auto &code : currency_conversion) {
       response->add_currency_codes(code.first);
