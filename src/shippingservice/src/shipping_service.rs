@@ -52,7 +52,7 @@ impl ShippingService for ShippingServer {
         &self,
         request: Request<GetQuoteRequest>,
     ) -> Result<Response<GetQuoteResponse>, Status> {
-        info!("GetQuoteRequest: {:?}", request);
+        info!("GetQuoteRequest: {:?} [span_id: {} trace_id: {}]", request,  span.span_context().span_id(), span.span_context().trace_id());
         let parent_cx =
             global::get_text_map_propagator(|prop| prop.extract(&MetadataMap(request.metadata())));
 
@@ -89,7 +89,7 @@ impl ShippingService for ShippingServer {
                 nanos: q.cents * NANOS_MULTIPLE,
             }),
         };
-        info!("Sending Quote: {}", q);
+        info!("Sending Quote: {} [span_id: {} trace_id: {}]", q, span.span_context().span_id(), span.span_context().trace_id());
 
         cx.span().set_attribute(semcov::trace::RPC_GRPC_STATUS_CODE.i64(RPC_GRPC_STATUS_CODE_OK));
         Ok(Response::new(reply))
@@ -98,7 +98,7 @@ impl ShippingService for ShippingServer {
         &self,
         request: Request<ShipOrderRequest>,
     ) -> Result<Response<ShipOrderResponse>, Status> {
-        info!("ShipOrderRequest: {:?}", request);
+        info!("ShipOrderRequest: {:?} [span_id: {} trace_id: {}]", request, span.span_context().span_id(), span.span_context().trace_id());
 
         let parent_cx =
             global::get_text_map_propagator(|prop| prop.extract(&MetadataMap(request.metadata())));
@@ -113,7 +113,8 @@ impl ShippingService for ShippingServer {
 
         let tid = create_tracking_id();
         span.set_attribute(KeyValue::new("app.shipping.tracking.id", tid.clone()));
-        info!("Tracking ID Created: {}", tid);
+        //info!("trace ID: {}", span.span_context().trace_id());
+        info!("Tracking ID Created: {} [span_id: {} trace_id: {}]", tid, span.span_context().span_id(), span.span_context().trace_id());
 
         span.add_event(
             "Shipping tracking id created, response sent back".to_string(),
