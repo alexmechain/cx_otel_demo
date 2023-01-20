@@ -52,12 +52,23 @@ impl ShippingService for ShippingServer {
         &self,
         request: Request<GetQuoteRequest>,
     ) -> Result<Response<GetQuoteResponse>, Status> {
-        //info!("GetQuoteRequest: {:?} [span_id: {} trace_id: {}]", request,  span.span_context().span_id(), span.span_context().trace_id());
+        
+        //@ALM: Moving log further down to retrieve span context
+        //info!("GetQuoteRequest: {:?}, request);
+        
+
         let parent_cx =
             global::get_text_map_propagator(|prop| prop.extract(&MetadataMap(request.metadata())));
+        
+        //@ALM: moved tracer instanciation here before request is muted by into_inner
+        let tracer = global::tracer("shippingservice");
+        let mut span = tracer.span_builder("hipstershop.ShippingService/GetQuote").with_kind(SpanKind::Server).start_with_context(&tracer, &parent_cx);
+
+        span.set_attribute(semcov::trace::RPC_SYSTEM.string(RPC_SYSTEM_GRPC));
+        info!("GetQuoteRequest: {:?} [span_id: {} trace_id: {}]", request,  span.span_context().span_id(), span.span_context().trace_id());
 
         let request_message = request.into_inner();
-
+        
         let itemct: u32 = request_message
             .items
             .into_iter()
@@ -66,13 +77,13 @@ impl ShippingService for ShippingServer {
         // We may want to ask another service for product pricing / info
         // (although now everything is assumed to be the same price)
         // check out the create_quote_from_count method to see how we use the span created here
-        let tracer = global::tracer("shippingservice");
-        let mut span = tracer.span_builder("hipstershop.ShippingService/GetQuote").with_kind(SpanKind::Server).start_with_context(&tracer, &parent_cx);
-
-        info!("GetQuoteRequest: {:?} [span_id: {} trace_id: {}]", request,  span.span_context().span_id(), span.span_context().trace_id());
+        
+        //@ALM Moved tracer instanciation further up here before request got muted (by into_inner)       
+        //let tracer = global::tracer("shippingservice");
+        //let mut span = tracer.span_builder("hipstershop.ShippingService/GetQuote").with_kind(SpanKind::Server).start_with_context(&tracer, &parent_cx);
 
         span.set_attribute(semcov::trace::RPC_SYSTEM.string(RPC_SYSTEM_GRPC));
-
+        
         span.add_event("Processing get quote request".to_string(), vec![]);
         span.set_attribute(KeyValue::new("app.shipping.zip_code", request_message.address.unwrap().zip_code));
 
@@ -92,7 +103,7 @@ impl ShippingService for ShippingServer {
                 nanos: q.cents * NANOS_MULTIPLE,
             }),
         };
-        info!("Sending Quote: {} [span_id: {} trace_id: {}]", q, span.span_context().span_id(), span.span_context().trace_id());
+        //info!("Sending Quote: {} [span_id: {} trace_id: {}]", q, span.span_context().span_id(), span.span_context().trace_id());
 
         cx.span().set_attribute(semcov::trace::RPC_GRPC_STATUS_CODE.i64(RPC_GRPC_STATUS_CODE_OK));
         Ok(Response::new(reply))
@@ -101,24 +112,29 @@ impl ShippingService for ShippingServer {
         &self,
         request: Request<ShipOrderRequest>,
     ) -> Result<Response<ShipOrderResponse>, Status> {
-        //info!("ShipOrderRequest: {:?} [span_id: {} trace_id: {}]", request, span.span_context().span_id(), span.span_context().trace_id());
-
+        
+        //@ALM: Moving log further down to retrieve span context
+        //info!("ShipOrderRequest: {:?}", request);
         let parent_cx =
             global::get_text_map_propagator(|prop| prop.extract(&MetadataMap(request.metadata())));
+        
+
         // in this case, generating a tracking ID is trivial
         // we'll create a span and associated events all in this function.
         let tracer = global::tracer("shippingservice");
         let mut span = tracer
             .span_builder("hipstershop.ShippingService/ShipOrder").with_kind(SpanKind::Server).start_with_context(&tracer, &parent_cx);
         
-        info!("ShipOrderRequest: {:?} [span_id: {} trace_id: {}]", request, span.span_context().span_id(), span.span_context().trace_id());
         span.set_attribute(semcov::trace::RPC_SYSTEM.string(RPC_SYSTEM_GRPC));
-
+        //@ALM Moved log here ot get span context right  
+        info!("ShipOrderRequest: {:?} [span_id: {} trace_id: {}]", request, span.span_context().span_id(), span.span_context().trace_id());
+        
         span.add_event("Processing shipping order request".to_string(), vec![]);
 
         let tid = create_tracking_id();
         span.set_attribute(KeyValue::new("app.shipping.tracking.id", tid.clone()));
-        //info!("trace ID: {}", span.span_context().trace_id());
+        
+        //@ALM Added span and trace ID to log
         info!("Tracking ID Created: {} [span_id: {} trace_id: {}]", tid, span.span_context().span_id(), span.span_context().trace_id());
 
         span.add_event(
