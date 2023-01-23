@@ -135,6 +135,8 @@ func (p *productCatalog) Watch(req *healthpb.HealthCheckRequest, ws healthpb.Hea
 
 func (p *productCatalog) ListProducts(ctx context.Context, req *pb.Empty) (*pb.ListProductsResponse, error) {
 	span := trace.SpanFromContext(ctx)
+	//@ALM: add logger for basic function with trace and span id
+	log.Infof("[ListProducts] %d item in catalog [span_id: %v trace_id: %v]", len(catalog), span.SpanContext().SpanID(), span.SpanContext().TraceID())
 
 	span.SetAttributes(
 		attribute.Int("app.products.count", len(catalog)),
@@ -172,6 +174,8 @@ func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductReque
 	}
 
 	msg := fmt.Sprintf("Product Found - ID: %s, Name: %s", req.Id, found.Name)
+	//@ALM add logger with span and trace id
+	log.Infof("[GetProduct] product_Id: %s, Name: %s [span_id: %v trace_id: %v]", req.Id, found.Name, span.SpanContext().SpanID(), span.SpanContext().TraceID())
 	span.AddEvent(msg)
 	span.SetAttributes(
 		attribute.String("app.product.name", found.Name),
@@ -183,6 +187,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 	span := trace.SpanFromContext(ctx)
 
 	var result []*pb.Product
+	log.Infof("[SearchProducts] Search for %s [span_id: %v trace_id: %v]", req.Query, span.SpanContext().SpanID(), span.SpanContext().TraceID())
 	for _, product := range catalog {
 		if strings.Contains(strings.ToLower(product.Name), strings.ToLower(req.Query)) ||
 			strings.Contains(strings.ToLower(product.Description), strings.ToLower(req.Query)) {
