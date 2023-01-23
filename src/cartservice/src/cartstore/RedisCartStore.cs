@@ -117,7 +117,7 @@ namespace cartservice.cartstore
 
         public async Task AddItemAsync(string userId, string productId, int quantity)
         {
-            
+            //@ALM : added span_id and trace_id to log
             Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
 
             try
@@ -160,6 +160,7 @@ namespace cartservice.cartstore
 
         public async Task EmptyCartAsync(string userId)
         {
+            //@ALM : added span_id and trace_id to log
             Console.WriteLine($"EmptyCartAsync called with userId={userId} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
 
             try

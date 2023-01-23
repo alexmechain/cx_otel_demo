@@ -35,7 +35,8 @@ namespace cartservice.cartstore
 
         public Task AddItemAsync(string userId, string productId, int quantity)
         {
-            Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}");
+            //@ALM: Added trace_id and span_id to logs
+            Console.WriteLine($"AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
             var newCart = new Hipstershop.Cart
                 {
                     UserId = userId,
@@ -73,11 +74,13 @@ namespace cartservice.cartstore
 
         public Task<Hipstershop.Cart> GetCartAsync(string userId)
         {
-            Console.WriteLine($"GetCartAsync called with userId={userId}");
+            //@ALM: Added trace_id and span_id to logs
+            Console.WriteLine($"GetCartAsync called with userId={userId} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
             Hipstershop.Cart cart = null;
             if (!userCartItems.TryGetValue(userId, out cart))
             {
-                Console.WriteLine($"No carts for user {userId}");
+                //@ALM: Added trace_id and span_id to logs
+                Console.WriteLine($"No carts for user {userId} [span_id: {Activity.Current.SpanId.ToHexString()} trace_id: {Activity.Current.TraceId.ToHexString()}]");
                 return Task.FromResult(emptyCart);
             }
 

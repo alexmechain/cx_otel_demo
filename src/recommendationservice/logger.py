@@ -24,9 +24,9 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
     def add_fields(self, log_record, record, message_dict):
         super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
         if not log_record.get('otelTraceID'):
-            log_record['otelTraceID'] = trace.format_trace_id(trace.get_current_span().get_span_context().trace_id)
+            log_record['trace_id'] = trace.format_trace_id(trace.get_current_span().get_span_context().trace_id)
         if not log_record.get('otelSpanID'):
-            log_record['otelSpanID'] = trace.format_span_id(trace.get_current_span().get_span_context().span_id)
+            log_record['span_id'] = trace.format_span_id(trace.get_current_span().get_span_context().span_id)
 
 def getJSONLogger(name):
     logger = logging.getLogger(name)
