@@ -290,7 +290,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		//@ALM: Add span and trace id to logs
 		log.Infof("order confirmation email sent to %q [span_id: %v trace_id: %v]", req.Email, span.SpanContext().SpanID(), span.SpanContext().TraceID())
 	}
-
+	time.Sleep(500 * time.Millisecond)
 	cs.sendToPostProcessor(ctx, orderResult)
 
 	resp := &pb.PlaceOrderResponse{Order: orderResult}
