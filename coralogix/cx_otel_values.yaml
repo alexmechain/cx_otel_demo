@@ -1,7 +1,7 @@
 default:
   image: 
     repository: alexmechain/otel-demo
-    tag: "1.2.2"
+    tag: "1.2.3"
 
 opentelemetry-collector:
 
