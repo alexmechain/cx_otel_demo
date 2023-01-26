@@ -4,6 +4,7 @@ default:
     tag: "1.2.2"
 
 opentelemetry-collector:
+
   config:
     exporters:
       coralogix:
@@ -14,39 +15,23 @@ opentelemetry-collector:
           endpoint: "otel-metrics.coralogix.com:443"
         logs:
           endpoint: "otel-logs.coralogix.com:443"
-
-        # Your Coralogix private key is sensitive
+        
         private_key: "bcaf694c-6080-aa9d-bf8b-d398e2b82b39"    
-          #valueFrom:
-            #secretKeyRef:
-              #name: mysecrets
-              #key: coralogix
-        # AppNameSubSystem values.
-        # The first non-empty resource attribute is used.
-        # application_name_attributes:
-        #   - "service.namespace"
-        #   - "k8s.namespace.name"
-        # subsystem_name_attributes:
-        #   - "service.name"
-        #   - "k8s.deployment.name"
-        #   - "k8s.statefulset.name"
-        #   - "k8s.daemonset.name"
-        #   - "k8s.cronjob.name"
-        #   - "k8s.job.name"
-        #   - "k8s.container.name"
-        # It is required that logs, metrics and traces emitted by this exporter
-        # are tagged in Coralogix
-        # with the default application and subsystem constants.
-        # Traces, Metrics and Logs emitted by this OpenTelemetry exporter
-        # are tagged in Coralogix with the default application and subsystem constants.
-        application_name: "ecommerce"
-        subsystem_name: "otel-demo"
-
+        
+        
+        subsystem_name_attributes: 
+        - "k8s.container.name"
+        application_name: "telemetry shop"
+        subsystem_name: "{{.Values.global.defaultSubsystemName }}"
+    # subsystem_name_attributes:
+    #   - "service.name"
+    #   - "k8s.deployment.name"
         # (Optional) Timeout is the timeout for every attempt to send data to the backend.
         timeout: 30s
     
       
     receivers:
+    #@ALM: comment out this prometheus receiver if you want prom metrics to be sent by prometheus
       prometheus:
         config:
           scrape_configs:
@@ -205,13 +190,16 @@ prometheus:
     enabled: true
   prometheus-node-exporter:
     enabled: true
+
+#@ALM: uncomment the following block of this config if you want metrics to be pushed by prometheus server rather than otel collector
+#@ALM: Modify <CORALOGIX API KEY> and <CORALOGIX PROM GATEWAY> 
 #   serverFiles:
 #     prometheus.yml: 
 #       remote_write:
-#       - url: https://prometheus-gateway.coralogix.com/prometheus/api/v1/write
+#       - url: https://<CORALOGIX PROM GATEWAY>/prometheus/api/v1/write
 #         name: 'k8smetrics'
 #         remote_timeout: 120s
-#         bearer_token: 'bcaf694c-6080-aa9d-bf8b-d398e2b82b39'  
+#         bearer_token: '<CORALOGIX API KEY>'  
 #       scrape_configs:  
 #       - job_name: 'node-exporter'
 #         kubernetes_sd_configs:
