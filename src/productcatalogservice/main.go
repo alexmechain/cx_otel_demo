@@ -21,6 +21,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	pb "github.com/opentelemetry/opentelemetry-demo/src/productcatalogservice/genproto/hipstershop"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -137,7 +138,7 @@ func (p *productCatalog) ListProducts(ctx context.Context, req *pb.Empty) (*pb.L
 	span := trace.SpanFromContext(ctx)
 	//@ALM: add logger for basic function with trace and span id
 	log.Infof("[ListProducts] %d item in catalog [span_id: %v trace_id: %v]", len(catalog), span.SpanContext().SpanID(), span.SpanContext().TraceID())
-
+	time.Sleep(500 * time.Millisecond)
 	span.SetAttributes(
 		attribute.Int("app.products.count", len(catalog)),
 	)

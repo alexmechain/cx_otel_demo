@@ -17,6 +17,7 @@
 # Python
 import os
 import random
+import time
 from concurrent import futures
 
 # Pip
@@ -105,6 +106,7 @@ def get_product_list(request_product_ids):
         indices = random.sample(range(num_products), num_return)
         # Fetch product ids from indices
         prod_list = [filtered_products[i] for i in indices]
+        time.sleep(1)
 
         span.set_attribute("app.filtered_products.list", prod_list)
 
