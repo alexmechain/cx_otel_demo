@@ -1,6 +1,6 @@
 # fluentbit-override.yaml:
 static_metadata:
-  app_name: otel
+  app_name: AstronomyShop
 dynamic_metadata:
   sub_system: kubernetes.container_name
 fluent-bit:
