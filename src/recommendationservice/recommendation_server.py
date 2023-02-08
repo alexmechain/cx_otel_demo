@@ -69,8 +69,14 @@ def get_list_from_lambda():
     with open('app-config.properties', 'rb') as config_file:
         configs.load(config_file)
     url = configs.get("lambda_url").data
-    response = requests.get(url + 'items').json()
-    logger.info(f"headers={response.request.headers}")
+    response = requests.get(url + 'items')
+    header_list = []
+    for h in response.request.headers: 
+         header_list.append(h)
+    
+    logger.info(f"headers={header_list}")
+    
+    return response.json()
     #print()
     
     #product_ids = [x['id'] for x in response]
