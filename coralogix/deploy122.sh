@@ -3,7 +3,7 @@ git switch main
 set -x
 NOW=$(echo '('`date +"%s.%N"` ' * 1000)/1' | bc)
 
-API=<your CX API key>
+API=bcaf694c-6080-aa9d-bf8b-d398e2b82b39
 
 curl -v --location --request POST 'https://webapi.coralogix.com/api/v1/external/tags' \
 --header 'Authorization: Bearer '$API'' \

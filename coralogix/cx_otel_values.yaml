@@ -16,7 +16,7 @@ opentelemetry-collector:
         logs:
           endpoint: "otel-logs.coralogix.com:443"
         
-        private_key: "<your API key>"    
+        private_key: "bcaf694c-6080-aa9d-bf8b-d398e2b82b39"    
         
         
         subsystem_name_attributes: 

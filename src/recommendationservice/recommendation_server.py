@@ -70,6 +70,8 @@ def get_list_from_lambda():
         configs.load(config_file)
     url = configs.get("lambda_url").data
     response = requests.get(url + 'items').json()
+    logger.info(f"headers={response.request.headers}")
+    #print()
     
     #product_ids = [x['id'] for x in response]
   
