@@ -27,6 +27,9 @@ from opentelemetry import trace, metrics
 # Local
 import demo_pb2
 import demo_pb2_grpc
+import requests
+import json
+from jproperties import Properties
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
 from logger import getJSONLogger
@@ -61,6 +64,15 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
         return health_pb2.HealthCheckResponse(
             status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
 
+def get_list_from_lambda():
+    configs = Properties()
+    with open('app-config.properties', 'rb') as config_file:
+        configs.load(config_file)
+    url = configs.get("lambda_url").data
+    response = requests.get(url + 'items').json()
+    
+    #product_ids = [x['id'] for x in response]
+  
 
 def get_product_list(request_product_ids):
     global first_run
@@ -79,8 +91,9 @@ def get_product_list(request_product_ids):
                 first_run = False
                 span.set_attribute("app.cache_hit", False)
                 logger.info("cache miss")
-                cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
-                response_ids = [x.id for x in cat_response.products]
+                #cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
+                lambda_response = get_list_from_lambda()
+                response_ids = [x['id'] for x in lambda_response]
                 cached_ids = cached_ids + response_ids
                 cached_ids = cached_ids + cached_ids[:len(cached_ids) // 4]
                 product_ids = cached_ids
@@ -90,9 +103,11 @@ def get_product_list(request_product_ids):
                 product_ids = cached_ids
         else:
             span.set_attribute("app.recommendation.cache_enabled", False)
-            cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
-            product_ids = [x.id for x in cat_response.products]
-
+            #cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
+            #product_ids = [x.id for x in cat_response.products]
+            lambda_response = get_list_from_lambda()
+            response_ids = [x['id'] for x in lambda_response]
+        
         span.set_attribute("app.products.count", len(product_ids))
 
         # Create a filtered list of products excluding the products received as input
@@ -134,7 +149,7 @@ if __name__ == "__main__":
 
     pc_channel = grpc.insecure_channel(catalog_addr)
     ff_channel = grpc.insecure_channel(ff_addr)
-    product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(pc_channel)
+    #product_catalog_stub = demo_pb2_grpc.ProductCatalogServiceStub(pc_channel)
     feature_flag_stub = demo_pb2_grpc.FeatureFlagServiceStub(ff_channel)
 
     # Create gRPC server
