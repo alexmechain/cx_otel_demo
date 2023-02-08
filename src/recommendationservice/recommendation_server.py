@@ -73,8 +73,9 @@ def get_list_from_lambda():
     header_list = []
     for h in response.request.headers: 
          header_list.append(h)
-    
-    logger.info(f"headers={header_list}")
+    file = open('myfile.dat', 'w+')
+    file.write(str(header_list))
+    logger.info("headers="+str(header_list))
     
     return response.json()
     #print()
